@@ -2,7 +2,12 @@ const {
   client, 
   getAllUsers, 
   createUser, 
-  updateUser 
+  updateUser, 
+  getUserById,
+  createPost,
+  updatePost,
+  getAllPosts,
+  getPostsByUser
 } = require('./index');
 //  DROPS TABLES 
 async function dropTables() {
@@ -34,8 +39,14 @@ async function createTables() {
         location varchar(255) NOT NULL,
         active BOOLEAN DEFAULT true
       );
+      CREATE TABLE posts (
+        id SERIAL PRIMARY KEY,
+        "authorId" INTEGER REFERENCES users(id),
+        title varchar(255) NOT NULL,
+        content TEXT NOT NULL,
+        active BOOLEAN DEFAULT true
+      );
     `);
-
     console.log("Finished building tables!");
   } catch (error) {
     console.error("Error building tables!");
@@ -73,6 +84,37 @@ async function createInitialUsers() {
     throw error;
   }
 }
+
+// CREATES INITIAL POSTS 
+async function createInitialPosts() {
+  try {
+    const [albert, sandra, glamgal] = await getAllUsers();
+
+    console.log("Starting to create posts...");
+    await createPost({
+      authorId: albert.id,
+      title: "First Post",
+      content: "This is my first post. I hope I love writing blogs as much as I love writing them."
+    });
+
+    await createPost({
+      authorId: sandra.id,
+      title: "How does this work?",
+      content: "Seriously, does this even do anything?"
+    });
+
+    await createPost({
+      authorId: glamgal.id,
+      title: "Living the Glam Life",
+      content: "Do you even? I swear that half of you are posing."
+    });
+    console.log("Finished creating posts!");
+  } catch (error) {
+    console.log("Error creating posts!");
+    throw error;
+  }
+}
+
 //  REBUILDS THE DATABASE 
 async function rebuildDB() {
   try {
@@ -81,7 +123,9 @@ async function rebuildDB() {
     await dropTables();
     await createTables();
     await createInitialUsers();
+    await createInitialPosts();
   } catch (error) {
+    console.log("Error Rebulding Database");
     throw error;
   }
 }
