@@ -1,8 +1,13 @@
 {
   "scripts": {
-    "seed:dev": "nodemon ./database/seed.js"
+    "seed:dev": "nodemon ./database/seed.js",
+    "start": "node index.js",
+    "start:dev": "nodemon index.js"
   },
   "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "morgan": "^1.10.0",
     "pg": "^8.8.0"
   },
   "devDependencies": {
