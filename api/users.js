@@ -1,29 +1,38 @@
 const express = require('express');
+
 const usersRouter = express.Router();
 
+const { getAllUsers, getUserById, getUserByUsername, createUser } = require('../db');
+
 const jwt = require('jsonwebtoken');
-const token = jwt.sign({ id: 1, username: 'albert'}, process.env.JWT_SCT, { expiresIn: '5h' })
+
+const token = jwt.sign({ id: 1, username: 'albert'}, process.env.JWT_SECRET, { expiresIn: '2h' })
 
 usersRouter.use(async (req, res, next) => {
+
     console.log("A request is being made to /users");
+
     next();
 });
 
 usersRouter.get('/', async (req, res) => {
-    try{
-        const users = await getAllUsers();
-        res.send({
-            users
-        });
-    }catch(error){
-        next(error)
-    }
+
+  try{
+    const users = await getAllUsers();
     
+    res.send({
+      users
+    });
+
+    } catch(error) {
+      next(error)
+    }
 });
 
 usersRouter.post('/login', async (req, res, next) => {
-    const { username, password } = req.body;
 
+    const { username, password } = req.body;
+    
     if (!username || !password) {
         next({
             name: "MissingCredentialsError",
@@ -31,12 +40,13 @@ usersRouter.post('/login', async (req, res, next) => {
         });
     }
 
-    try{
+    try {
+
         const user = await getUserByUsername(username);
 
         if (user && user.password == password) {
             let token = jwt.sign(user, process.env.JWT_SECRET);
-
+            
             res.send({ message: "you're logged in!", token });
         } else {
             next({ 
