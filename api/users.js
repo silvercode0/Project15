@@ -2,11 +2,10 @@ const express = require('express');
 
 const usersRouter = express.Router();
 
-const { getAllUsers, getUserById, getUserByUsername, createUser } = require('../db');
+const { getAllUsers, getUserById, getUserByUsername, createUser } = require('../database');
 
 const jwt = require('jsonwebtoken');
-
-const token = jwt.sign({ id: 1, username: 'albert'}, process.env.JWT_SECRET, { expiresIn: '2h' })
+const token = jwt.sign({ id: 1, username: 'albert'}, process.env.JWT_SECRET, { expiresIn: '10h' })
 
 usersRouter.use(async (req, res, next) => {
 
@@ -47,7 +46,7 @@ usersRouter.post('/login', async (req, res, next) => {
         if (user && user.password == password) {
             let token = jwt.sign(user, process.env.JWT_SECRET);
             
-            res.send({ message: "you're logged in!", token });
+            res.send({ message: "you're logged in!", token /* token: `${token}` */ });
         } else {
             next({ 
                 name: 'IncorrectCredentialsError', 

@@ -1,6 +1,10 @@
 const express = require('express');
 const postsRouter = express.Router();
 
+const { requireUser } = require('./utils');
+postsRouter.post('/', requireUser, async (req, res, next) => {
+    res.send({ message: 'under construction' });
+});
 
 const { getAllPosts, createPost, updatePost, getPostById } = require('../database');
 
@@ -23,6 +27,32 @@ postsRouter.get('/', async (req, res) => {
         });
     } catch ({ name, message }) {
         next({ name, message })
+    }
+});
+
+postsRouter.post("/", requireUser, async (req, res, next) => {
+    const { title, content, tags = "" } = req.body;
+
+    const tagArr = tags.trim().split(/\s+/)
+    const postData = {};
+
+    if (tagArr.length) {
+        postData.tags = tagArr;
+    }
+    try{
+        postData.authorId = req.user.id
+
+        postData.title = title
+        postData.content = content
+
+        const post = await createPost(postData)
+        if (post) {
+            res.send({
+                post
+            })
+        } 
+    } catch ({ name, message }) {
+        next({ name, message });
     }
 });
 
@@ -63,6 +93,7 @@ postsRouter.patch('/:postId', requireUser, async(req, res, next) => {
 postsRouter.delete('/:postId', requireUser, async (req, res, next) => {
     try {
         const post = await getPostById(req.params.postId);
+        // I want to know what it is getting // 
         console.log(post)
 
         if (post && post.author.id === req.user.id) {
